@@ -2,6 +2,7 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Chart from 'chart.js';
+import axios from 'axios';
 
 function App() {
   return (
@@ -15,15 +16,45 @@ function App() {
 
 class Welcome extends React.Component {
 
-  componentDidMount(){
+  constructor(){
+    super();
+
+    this.state = {
+      players: '',
+      dano: ''
+    };
+  }
+
+  componentWillMount(){
+    var myHeaders = new Headers();
+
+    var myInit = { method: 'GET',
+                  headers: myHeaders,
+                  cache: 'default' };
+
+    fetch('https://b4d47acadb78.ngrok.io',myInit)
+    .then(function(response) {
+      return response.json()
+    }).then(data => {
+      var names = data.map(dt => dt.Name);
+      var damages = data.map(dtm => dtm.Damage)
+
+      this.setState({
+        players: names,
+        dano: damages
+      })
+    })
+  }
+
+  componentDidUpdate(){
     var ctx = document.getElementById('myChart');
     var myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: ['Red', 'Blue'],
+            labels: this.state.players,
             datasets: [{
-                label: '# of Votes',
-                data: [5, 6],
+                label: 'DAMAGE',
+                data: this.state.dano,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
                     'rgba(54, 162, 235, 0.2)'
@@ -32,7 +63,7 @@ class Welcome extends React.Component {
                     'rgba(255, 99, 132, 1)',
                     'rgba(54, 162, 235, 1)'
                 ],
-                borderWidth: 1
+                borderWidth: 3
             }]
         },
         options: {
@@ -48,7 +79,8 @@ class Welcome extends React.Component {
   }
 
   render() {
-    return <canvas id="myChart" width="50" height="50"></canvas>;
+    console.log(this.state)
+    return <canvas id="myChart" style={{width: '100px !important',height: '100px !important'}}></canvas>;
   }
 }
 
